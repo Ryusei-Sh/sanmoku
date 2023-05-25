@@ -1,0 +1,90 @@
+import random
+import tkinter as tk
+from tkinter import messagebox
+
+# ゲームの状態を表す変数
+EMPTY = " "
+PLAYER = "○"
+COMPUTER = "✕"
+
+# ゲームボードの初期化
+board = [EMPTY, EMPTY, EMPTY,
+         EMPTY, EMPTY, EMPTY,
+         EMPTY, EMPTY, EMPTY]
+
+# ゲームの勝利条件のパターン
+winning_patterns = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],  # 横の勝利条件
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],  # 縦の勝利条件
+    [0, 4, 8], [2, 4, 6]               # 斜めの勝利条件
+]
+
+# ゲームの状態
+current_player = PLAYER
+game_over = False
+
+
+def on_click(index):
+    global current_player, game_over
+
+    # ゲームが終了している場合はクリックを無視
+    if game_over:
+        return
+
+    # クリックされたマスが空白であることを確認
+    if board[index] == EMPTY:
+        # クリックされたマスを現在のプレイヤーで埋める
+        board[index] = current_player
+        draw_board()
+
+        # 現在のプレイヤーが勝利したかどうかをチェック
+        if check_winner(current_player):
+            messagebox.showinfo("結果", f"{current_player}の勝利！")
+            game_over = True
+            return
+
+        # 引き分けの場合
+        if is_board_full():
+            messagebox.showinfo("結果", "引き分け！")
+            game_over = True
+            return
+
+        # プレイヤーを切り替える
+        current_player = COMPUTER
+        # コンピューターが手を打つ
+        computer_move()
+        draw_board()
+
+        # コンピューターが勝利したかどうかをチェック
+        if check_winner(COMPUTER):
+            messagebox.showinfo("結果", f"{COMPUTER}の勝利！")
+            game_over = True
+            return
+
+        # 引き分けの場合
+        if is_board_full():
+            messagebox.showinfo("結果", "引き分け！")
+            game_over = True
+            return
+
+
+def check_winner(player):
+    for pattern in winning_patterns:
+        if all(board[index] == player for index in pattern):
+            return True
+    return False
+
+
+def is_board_full():
+    return all(cell != EMPTY for cell in board)
+
+
+def computer_move():
+    # 空白のマスのインデックスを取得
+    empty_cells = [index for index, cell in enumerate(board) if cell == EMPTY]
+
+    # ランダムにインデックスを選択
+    index = random.choice(empty_cells)
+
+    # 選択したマスをコンピューターの手で埋める
+    board[index] = current_player
